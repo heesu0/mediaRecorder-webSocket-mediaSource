@@ -2,7 +2,7 @@
 ------------
 
 ## description
-------------
+
 Testing client to client video chat without WebRTC.
 Used the web socket server to send and receive data in real time.
 
@@ -16,18 +16,20 @@ The flow goes like this
 
 
 ## Usage
-------------
-### Start the web socket server by npm install and npm start
+
+#### Start the web socket server by npm install and npm start
 ```
 $ cd backend
 $ npm install
 $ npm start
 ```
-### then start client side
+
+#### then start client side
 ```
 $ cd frontend
 $ npm install
 $ npm start
 ```
-### open localhost:3000 in broswer
+
+#### open http://localhost:3000 in broswer
 
