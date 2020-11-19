@@ -1,6 +1,9 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var fs = require('fs');
+
+app.use(express.static('js'));
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
