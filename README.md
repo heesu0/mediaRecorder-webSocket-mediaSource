@@ -3,16 +3,16 @@
 
 ## description
 
-Testing browser to browser video chat without WebRTC.
-Used the web socket server to send and receive data in real time.
+Browser to browser video chat testing without WebRTC.
+How to Use the web socket server to send and receive data in real time.
 
-The flow goes like this
+The overall process will be like this:
 
 1. Obtain media stream using `getUserMedia` to access webcams on the local computer.
 2. `MediaRecorder` encodes media stream and converts it into blob data.(media segment)
-3. Send blob data to the server via a web socket.(Blob data converts to arrayBuffer)
+3. Send blob data to the server via a web socket.(Blob data will be converted into arrayBuffer)
 4. The server returns the data back to the client.
-5. Appends the media segment to the SourceBuffer in MediaSource using `appendBuffer`.
+5. By using `appendBuffer`, appends the media segment to the SourceBuffer in MediaSource.
 
 
 ## Usage
