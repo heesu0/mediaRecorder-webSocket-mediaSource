@@ -3,7 +3,7 @@
 
 ## description
 
-Testing client to client video chat without WebRTC.
+Testing browser to browser video chat without WebRTC.
 Used the web socket server to send and receive data in real time.
 
 The flow goes like this
