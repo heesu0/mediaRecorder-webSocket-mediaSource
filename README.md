@@ -17,7 +17,7 @@ The overall process will be like this:
 
 ## Usage
 
-#### Start the web socket server by npm install and npm start
+#### Start the web socket server by `npm install` and `npm start`
 ```
 $ cd backend
 $ npm install
