@@ -81,14 +81,14 @@ function handleStop(event) {
 
 function toggleStreaming() {
     if (streamingButton.textContent === 'Start Streaming') {
-        startRecording();
+        startStreaming();
     } else {
-        stopRecording();
+        stopStreaming();
         streamingButton.textContent = 'Start Streaming';
     }
 }
 
-function startRecording() {
+function startStreaming() {
     // var options = { mimeType: 'video/webm; codecs="h264, opus"' };
     var options = { mimeType: 'video/webm; codecs="vp8, opus"' };
     delayQueue = [];
@@ -120,7 +120,7 @@ function startRecording() {
     console.log('MediaRecorder started', mediaRecorder);
 }
 
-function stopRecording() {
+function stopStreaming() {
     socket.disconnect();
     mediaRecorder.stop();
 }
