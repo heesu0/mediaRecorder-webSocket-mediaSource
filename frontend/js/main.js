@@ -1,21 +1,21 @@
 'use strict';
-var socket = io.connect('http://localhost:80');
-var mediaSource = new MediaSource();
-var mediaBuffer;
-var mediaRecorder;
-var delayQueue;
-var duration;
 
-var camVideo = document.querySelector('video#cam');
-var socketVideo = document.querySelector('video#socket');
+const socket = io.connect('http://localhost:80');
+const mediaSource = new MediaSource();
+const delayQueue = [];
+let sourceBuffer;
+let mediaRecorder;
+let duration;
 
-var streamingButton = document.querySelector('button#streaming');
+const camVideo = document.querySelector('video#cam');
+const socketVideo = document.querySelector('video#socket');
+const streamingButton = document.querySelector('button#streaming');
 streamingButton.onclick = toggleStreaming;
 
 navigator.getUserMedia = navigator.getUserMedia ||
     navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.mediaDevices.getUserMedia;
 
-var constraints = {
+const constraints = {
     audio: true,
     video: true
 };
@@ -23,12 +23,12 @@ var constraints = {
 navigator.getUserMedia(constraints, successCallback, errorCallback);
 
 mediaSource.addEventListener('sourceopen', function (e) {
-    //var mimeCodec = 'video/mp4; codecs="avc1.42E01E, opus"';
-    var mimeCodec = 'video/webm; codecs="vp8, opus"';
-    mediaBuffer = mediaSource.addSourceBuffer(mimeCodec);
-    mediaBuffer.addEventListener('updateend', function () {
-        if (delayQueue.length > 0 && !mediaBuffer.updating) {
-            mediaBuffer.appendBuffer(delayQueue.shift());
+    //const mimeCodec = 'video/mp4; codecs="avc1.42E01E, opus"';
+    const mimeCodec = 'video/webm; codecs="vp8, opus"';
+    sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
+    sourceBuffer.addEventListener('updateend', function () {
+        if (delayQueue.length > 0 && !sourceBuffer.updating) {
+            sourceBuffer.appendBuffer(delayQueue.shift());
             console.log('delay Buffer fixed');
         }
     });
@@ -39,9 +39,9 @@ socketVideo.src = window.URL.createObjectURL(mediaSource);
 socket.on('return', function (data) {
     if (mediaSource.readyState == 'open') {
         // data[0] has 4. why????
-        var arrayBuffer = new Uint8Array(data).slice(1);
-        if (!mediaBuffer.updating && delayQueue.length == 0) {
-            mediaBuffer.appendBuffer(arrayBuffer);
+        const arrayBuffer = new Uint8Array(data).slice(1);
+        if (!sourceBuffer.updating && delayQueue.length == 0) {
+            sourceBuffer.appendBuffer(arrayBuffer);
         } else {
             delayQueue.push(arrayBuffer);
         }
@@ -89,9 +89,8 @@ function toggleStreaming() {
 }
 
 function startStreaming() {
-    // var options = { mimeType: 'video/webm; codecs="h264, opus"' };
-    var options = { mimeType: 'video/webm; codecs="vp8, opus"' };
-    delayQueue = [];
+    // const options = { mimeType: 'video/webm; codecs="h264, opus"' };
+    const options = { mimeType: 'video/webm; codecs="vp8, opus"' };
     try {
         mediaRecorder = new MediaRecorder(window.stream, options);
     } catch (e0) {
