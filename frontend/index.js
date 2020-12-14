@@ -1,7 +1,7 @@
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-var fs = require('fs');
+const express = require('express');
+const app = express();
+const http = require('http').Server(app);
+const fs = require('fs');
 
 app.use(express.static('js'));
 
