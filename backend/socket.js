@@ -1,7 +1,7 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var fs = require('fs');
+const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const fs = require('fs');
 
 io.on('connection', function (socket) {
   console.log('websocket connected');
