@@ -1,7 +1,7 @@
 # mediaRecorder-webSocket-mediaSource
 ------------
 
-## description
+## Description
 
 Browser to browser video chat testing without WebRTC.
 How to Use the web socket server to send and receive data in real time.
