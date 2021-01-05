@@ -2,15 +2,16 @@
 
 const socket = io.connect('http://localhost:80');
 const mediaSource = new MediaSource();
-const delayQueue = [];
+const callbackQueue = [];
 let sourceBuffer;
 let mediaRecorder;
 let duration;
+let isMediaInit = false;
 
-const camVideo = document.querySelector('video#cam');
-const socketVideo = document.querySelector('video#socket');
-const streamingButton = document.querySelector('button#streaming');
-streamingButton.onclick = toggleStreaming;
+const localVideo = document.querySelector('video#localVideo');
+const remoteVideo = document.querySelector('video#remoteVideo');
+const streamingBtn = document.querySelector('button#streamingBtn');
+streamingBtn.onclick = toggleStreaming;
 
 navigator.getUserMedia = navigator.getUserMedia ||
     navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.mediaDevices.getUserMedia;
@@ -23,27 +24,43 @@ const constraints = {
 navigator.getUserMedia(constraints, successCallback, errorCallback);
 
 mediaSource.addEventListener('sourceopen', function (e) {
-    //const mimeCodec = 'video/mp4; codecs="avc1.42E01E, opus"';
+    // const mimeCodec = 'video/mp4; codecs="avc1.42E01E, opus"';
     const mimeCodec = 'video/webm; codecs="vp8, opus"';
     sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
+    // sourceBuffer.mode = 'segments';
     sourceBuffer.addEventListener('updateend', function () {
-        if (delayQueue.length > 0 && !sourceBuffer.updating) {
-            sourceBuffer.appendBuffer(delayQueue.shift());
-            console.log('delay Buffer fixed');
+
+        // Update if currentTime is slower than 1 second from the time currently buffered in sourceBuffer
+        if (isMediaInit) {
+            const ranges = sourceBuffer.buffered;
+            const bufferLength = ranges.length;
+            if (bufferLength != 0) {
+                if (sourceBuffer.buffered.end(0) - remoteVideo.currentTime > 0.5) {
+                    remoteVideo.currentTime = sourceBuffer.buffered.end(0);
+                    console.log("Update currentTime!!!!");
+                }
+            }
+        } else {
+            isMediaInit = true;
+        }
+
+        // Append buffer to sourceBuffer if sourceBuffer is not updating 
+        if (callbackQueue.length > 0 && !sourceBuffer.updating) {
+            sourceBuffer.appendBuffer(callbackQueue.shift());
+            console.log('Delayed buffer fix');
         }
     });
 }, false);
 
-socketVideo.src = window.URL.createObjectURL(mediaSource);
+remoteVideo.src = window.URL.createObjectURL(mediaSource);
 
 socket.on('return', function (data) {
     if (mediaSource.readyState == 'open') {
-        // data[0] has 4. why????
-        const arrayBuffer = new Uint8Array(data).slice(1);
-        if (!sourceBuffer.updating && delayQueue.length == 0) {
+        const arrayBuffer = new Uint8Array(data);
+        if (!sourceBuffer.updating && callbackQueue.length == 0) {
             sourceBuffer.appendBuffer(arrayBuffer);
         } else {
-            delayQueue.push(arrayBuffer);
+            callbackQueue.push(arrayBuffer);
         }
     }
 });
@@ -56,11 +73,11 @@ function successCallback(stream) {
     console.log('getUserMedia() got stream: ', stream);
     stream.inactive = eventTest;
     window.stream = stream;
-    camVideo.srcObject = stream;
-    camVideo.onloadedmetadata = function (event) {
+    localVideo.srcObject = stream;
+    localVideo.onloadedmetadata = function (event) {
         console.log("onloadedmetadata", event);
     }
-    camVideo.addEventListener('play', (event) => {
+    localVideo.addEventListener('play', (event) => {
         console.log("play", event);
     });
 }
@@ -80,11 +97,11 @@ function handleStop(event) {
 }
 
 function toggleStreaming() {
-    if (streamingButton.textContent === 'Start Streaming') {
+    if (streamingBtn.textContent === 'Start Streaming') {
         startStreaming();
     } else {
         stopStreaming();
-        streamingButton.textContent = 'Start Streaming';
+        streamingBtn.textContent = 'Start Streaming';
     }
 }
 
@@ -96,7 +113,7 @@ function startStreaming() {
     } catch (e0) {
         console.log('Unable to create MediaRecorder with options Object: ', e0);
         try {
-            options = { mimeType: 'video/webm,codecs=vp9', bitsPerSecond: 100000 };
+            options = { mimeType: 'video/webm,codecs=vp8', bitsPerSecond: 100000 };
             mediaRecorder = new MediaRecorder(window.stream, options);
         } catch (e1) {
             console.log('Unable to create MediaRecorder with options Object: ', e1);
@@ -112,7 +129,7 @@ function startStreaming() {
         }
     }
     console.log('Created MediaRecorder', mediaRecorder, 'with options', options);
-    streamingButton.textContent = 'Stop Streaming';
+    streamingBtn.textContent = 'Stop Streaming';
     mediaRecorder.onstop = handleStop;
     mediaRecorder.ondataavailable = handleDataAvailable;
     mediaRecorder.start(1); // time slice 1ms
