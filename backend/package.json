@@ -8,7 +8,7 @@
     "start": "node socket.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Choi-Heesu",
   "license": "ISC",
   "dependencies": {
     "express": "^4.10.2",
