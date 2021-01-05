@@ -1,12 +1,13 @@
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
-const fs = require('fs');
+//const fs = require('fs');
+const path = require('path');
 
-app.use(express.static('js'));
+app.use('/js', express.static(path.join(__dirname, '/js')));
 
 app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(path.join(__dirname, '/index.html'));
 });
 
 http.listen(3000, function(){
